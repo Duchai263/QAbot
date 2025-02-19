@@ -1,0 +1,4 @@
+venv
+doc
+test*
+__pycache__
