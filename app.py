@@ -1,32 +1,41 @@
+from flask import Flask, request, jsonify, render_template
 import os
-from getdata import get_data
 
-from azure.core.credentials import AzureKeyCredential
-from azure.ai.language.questionanswering import QuestionAnsweringClient
-from azure.ai.language.questionanswering import models as qna
+app = Flask(__name__)
+# def get_ai_response(user_input: str) -> str:
+    # response = get_answer(user_input)
+    # answer = response["answer"]
+    # source = response["source"]
+
+    # return f"{answer} \n Source: {source}"
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_input = request.json.get('message')
+    # response = get_ai_response(user_input)
+    # return jsonify({'response': response})
+    return jsonify({'response': user_input})
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '' or not file.filename.lower().endswith('.txt'):
+        return jsonify({'error': 'Invalid file format. Only .txt files are allowed.'}), 400
 
 
-endpoint = f"{os.environ.get("AZURE_ENDPOINT")}"
-credential = AzureKeyCredential(f"{os.environ.get("LANG_RESOURCE_KEY")}")
+    file_content = file.read().decode('utf-8')
+    file_name = file.filename
 
+    # doc = Document(page_content=file_content, metadata={"source": file_name})
+    # add_document(doc)
 
-data_location = "doc"
-context = get_data(data_location)
+    return jsonify({'message': 'File content read successfully.', 'content': file_content, 'filename': file_name})
 
-def main():
-    client = QuestionAnsweringClient(endpoint, credential)
-    with client:
-        question="What is the working time?"
-        input = qna.AnswersFromTextOptions(
-            question=question,
-            text_documents=[context]
-        )
-        output = client.get_answers_from_text(input)
-
-    # best_answer = [a for a in output.answers if a.confidence > 0.9][0]
-    best_answer = output.answers[0]
-    print(u"Q: {}".format(input.question))
-    print(u"A: {}".format(best_answer.answer))
-    print("Confidence Score: {}".format(output.answers[0].confidence))
 if __name__ == '__main__':
-    main()
+    app.run(debug=True)
