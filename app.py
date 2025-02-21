@@ -2,12 +2,12 @@ from flask import Flask, request, jsonify, render_template
 import os
 
 app = Flask(__name__)
-# def get_ai_response(user_input: str) -> str:
-    # response = get_answer(user_input)
-    # answer = response["answer"]
-    # source = response["source"]
+def get_ai_response(user_input: str) -> str:
+    response = get_answer(user_input)
+    answer = response["answer"]
+    source = response["source"]
 
-    # return f"{answer} \n Source: {source}"
+    return f"{answer} \n Source: {source}"
 
 @app.route('/')
 def index():
@@ -16,9 +16,9 @@ def index():
 @app.route('/chat', methods=['POST'])
 def chat():
     user_input = request.json.get('message')
-    # response = get_ai_response(user_input)
-    # return jsonify({'response': response})
-    return jsonify({'response': user_input})
+    response = get_ai_response(user_input)
+    return jsonify({'response': response})
+    # return jsonify({'response': user_input})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -32,8 +32,8 @@ def upload_file():
     file_content = file.read().decode('utf-8')
     file_name = file.filename
 
-    # doc = Document(page_content=file_content, metadata={"source": file_name})
-    # add_document(doc)
+    doc = Document(page_content=file_content, metadata={"source": file_name})
+    add_document(doc)
 
     return jsonify({'message': 'File content read successfully.', 'content': file_content, 'filename': file_name})
 
